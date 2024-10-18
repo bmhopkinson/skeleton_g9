@@ -1,0 +1,37 @@
+steps:
+# Install dependencies
+- name: python
+  entrypoint: pip
+  args: ["install", "-r", "requirements.txt", "--user"]
+
+# Run unit tests
+- name: python
+  entrypoint: python
+  args: ["-m", "pytest", "--junitxml=${SHORT_SHA}_test_log.xml"] 
+
+  # Docker Build
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 
+         'us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}', '.']
+
+# Docker push to Google Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push',  'us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}']
+
+# Deploy to Cloud Run
+- name: google/cloud-sdk
+  args: ['gcloud', 'run', 'deploy', 'helloworld-${SHORT_SHA}', 
+         '--image=us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}', 
+         '--region', 'us-west2', '--platform', 'managed', 
+         '--allow-unauthenticated']
+
+# Save test logs to Google Cloud Storage
+artifacts:
+  objects:
+    location: gs://skeleton-g9-artifacts/
+    paths:
+      - ${SHORT_SHA}_test_log.xml
+# Store images in Google Artifact Registry 
+images:
+  - us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}
+  
