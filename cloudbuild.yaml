@@ -12,16 +12,16 @@ steps:
   # Docker Build
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 
-         'us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}', '.']
+         'us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:1', '.']
 
 # Docker push to Google Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push',  'us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}']
+  args: ['push',  'us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:1']
 
 # Deploy to Cloud Run
 - name: google/cloud-sdk
-  args: ['gcloud', 'run', 'deploy', 'helloworld-${SHORT_SHA}', 
-         '--image=us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}', 
+  args: ['gcloud', 'run', 'deploy', 'helloworld-1', 
+         '--image=us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:1', 
          '--region', 'us-west2', '--platform', 'managed', 
          '--allow-unauthenticated']
 
@@ -33,5 +33,5 @@ artifacts:
       - ${SHORT_SHA}_test_log.xml
 # Store images in Google Artifact Registry 
 images:
-  - us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:${SHORT_SHA}
+  - us-west2-docker.pkg.dev/${PROJECT_ID}/skeleton-g9/myimage:1
   
